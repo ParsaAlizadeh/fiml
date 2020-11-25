@@ -1,7 +1,13 @@
 import os
 import subprocess
 import inquirer
+import logging
 from configparser import ConfigParser
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(levelname)s] %(message)s"
+)
 
 
 def main():
@@ -10,10 +16,14 @@ def main():
     all_files = os.listdir()
     video_files = sorted(filter(is_video, all_files))
     sub_files = sorted(filter(is_sub, all_files))
-    assert not sub_files or len(video_files) <= len(sub_files)
+
+    if len(sub_files) < len(video_files):
+        logging.error("Number of subs less than videos")
+        return
 
     if counter >= len(video_files):
-        return print("You watched all episodes already")
+        logging.info("You watched all episodes already")
+        return
 
     answer = inquirer.prompt([
         inquirer.List("episode",
@@ -46,6 +56,7 @@ def get_parser(filename: str):
 
 
 def create_parser(filename: str):
+    logging.info("Initialize configs for first time")
     parser = ConfigParser()
     parser["main"] = {"counter": "0"}
     write_parser(parser, filename)
@@ -73,7 +84,7 @@ def get_command(video: str, sub: str):
 
 
 def watch_video(video: str, sub: str):
-    print(f"Watching {video}...")
+    logging.info(f"Watching {video}...")
     command = get_command(video, sub)
     subprocess.run(command)
 
