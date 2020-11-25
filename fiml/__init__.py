@@ -22,7 +22,7 @@ def main():
         return logging.error("Number of subs less than videos")
 
     if counter >= len(video_files):
-        return logging.info("You watched all episodes already")
+        logging.info("You watched all episodes already :)")
 
     current = choose_video(video_files, min(counter, len(video_files)))
     if current == -1:
