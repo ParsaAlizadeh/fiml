@@ -28,9 +28,12 @@ def main():
     answer = inquirer.prompt([
         inquirer.List("episode",
                       message="Which episode do you want to watch?",
-                      choices=video_files,
+                      choices=video_files + ["exit"],
                       default=video_files[counter])
     ])
+
+    if answer["episode"] == "exit":
+        return logging.info("Ok, no episode for now")
 
     current = video_files.index(answer["episode"])
     watch_video(video_files[current],
