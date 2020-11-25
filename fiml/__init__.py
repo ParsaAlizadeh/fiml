@@ -1,8 +1,9 @@
+import logging
 import os
 import subprocess
-import inquirer
-import logging
 from configparser import ConfigParser
+
+import inquirer
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,12 +19,10 @@ def main():
     sub_files = sorted(filter(is_sub, all_files))
 
     if len(sub_files) < len(video_files):
-        logging.error("Number of subs less than videos")
-        return
+        return logging.error("Number of subs less than videos")
 
     if counter >= len(video_files):
-        logging.info("You watched all episodes already")
-        return
+        return logging.info("You watched all episodes already")
 
     answer = inquirer.prompt([
         inquirer.List("episode",
