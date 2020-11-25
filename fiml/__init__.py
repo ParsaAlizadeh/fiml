@@ -24,17 +24,10 @@ def main():
     if counter >= len(video_files):
         return logging.info("You watched all episodes already")
 
-    answer = inquirer.prompt([
-        inquirer.List("episode",
-                      message="Which episode do you want to watch?",
-                      choices=video_files + ["exit"],
-                      default=video_files[counter])
-    ])
+    current = choose_video(video_files, min(counter, len(video_files)))
+    if current == -1:
+        return logging.info("Ok, no episodes for now")
 
-    if answer["episode"] == "exit":
-        return logging.info("Ok, no episode for now")
-
-    current = video_files.index(answer["episode"])
     watch_video(video_files[current],
                 sub_files[current] if sub_files else "")
 
@@ -83,6 +76,18 @@ def get_command(video: str, sub: str):
     if sub:
         command.append(f"--sub-file={sub}")
     return command
+
+
+def choose_video(videos, default):
+    options = videos + ["exit"]
+    answer = inquirer.prompt([
+        inquirer.List("episode",
+                      message="Which episode do you want to watch?",
+                      choices=options,
+                      default=options[default])
+    ])
+    res = answer["episode"]
+    return videos.index(res) if res != "exit" else -1
 
 
 def watch_video(video: str, sub: str):
