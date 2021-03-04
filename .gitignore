@@ -1,5 +1,7 @@
-/.idea
-/build
-/dist
-/fiml.egg-info
+.idea/
+build/
+dist/
+fiml.egg-info/
+.vscode/
+
 build.sh
