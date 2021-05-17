@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import subprocess
+import mimetypes
 from typing import *
 
 import inquirer
@@ -38,12 +39,14 @@ class Video:
     @staticmethod
     def is_video(filename: str) -> bool:
         """ check if video """
-        return any(filename.endswith(ext) for ext in (".mp4", ".mkv"))
+        guess_type, encode = mimetypes.guess_type(filename)
+        return guess_type is not None and guess_type[:6] == "video/"
 
     @staticmethod
     def is_sub(filename: str) -> bool:
         """ check if sub """
-        return filename.endswith("srt")
+        guess_type, encode = mimetypes.guess_type(filename)
+        return guess_type == "application/x-subrip"
 
     @classmethod
     def find_all(cls, files: List[str]):
