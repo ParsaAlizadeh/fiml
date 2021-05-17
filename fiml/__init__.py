@@ -4,7 +4,6 @@ import json
 import logging
 import os
 import subprocess
-from configparser import ConfigParser
 from typing import *
 
 import inquirer
@@ -28,7 +27,7 @@ class Video:
         self.sub = sub_file
 
     def watch(self) -> int:
-        ''' call watch process '''
+        """ call watch process """
         logging.info(f"Watching {self.video}...")
         command = ["mpv", self.video, "--no-terminal"]
         if self.sub:
@@ -38,17 +37,17 @@ class Video:
 
     @staticmethod
     def is_video(filename: str) -> bool:
-        ''' check if video '''
+        """ check if video """
         return any(filename.endswith(ext) for ext in (".mp4", ".mkv"))
 
     @staticmethod
     def is_sub(filename: str) -> bool:
-        ''' check if sub '''
+        """ check if sub """
         return filename.endswith("srt")
 
     @classmethod
     def find_all(cls, files: List[str]):
-        ''' find and match videos and subs '''
+        """ find and match videos and subs """
         # sort lexographically
         videos = sorted(filter(cls.is_video, files))
         subs = sorted(filter(cls.is_sub, files))
@@ -60,17 +59,17 @@ class Context:
     def __init__(self):
         self.data = {}
         self.counter = 0
-    
+
     @property
     def counter(self):
         return self.data['counter']
-    
+
     @counter.setter
     def counter(self, x: int):
         self.data['counter'] = x
 
     def read_file(self, filename: str):
-        ''' load from file '''
+        """ load from file """
         if not os.path.isfile(filename):
             return self
         with open(filename, 'r') as file:
@@ -78,32 +77,37 @@ class Context:
         return self
 
     def write_file(self, filename: str):
-        ''' write to file '''
+        """ write to file """
         with open(filename, 'w') as file:
             json.dump(self.data, file)
 
 
 def choose_option(message: str, options: List[str], default: int = 0) -> int:
-    ''' option prompt on terminal '''
+    """ option prompt on terminal """
     answer = inquirer.prompt([
-        inquirer.List("list",
-                      message=message,
-                      choices=options,
-                      default=options[default])
+        inquirer.List(
+            "list",
+            message=message,
+            choices=options,
+            default=options[default]
+        )
     ])
     return options.index(answer["list"])
 
 
 def ask_confirm(message: str) -> bool:
-    ''' yes/no question on terminal '''
+    """ yes/no question on terminal """
     answer = inquirer.prompt([
-        inquirer.Confirm("confirm",
-                         message=message)
+        inquirer.Confirm(
+            "confirm",
+            message=message
+        )
     ])
     return answer["confirm"]
 
+
 def list_files(root):
-    ''' list all files inside root '''
+    """ list all files inside root """
     result = []
     for root, _, files in os.walk(root):
         for f in files:
@@ -119,7 +123,7 @@ def main():
 
     # find videos and match subs to them
     videos = Video.find_all(all_files)
-    
+
     # if no new episode
     if ctx.counter >= len(videos):
         logging.info("You watched all episodes already :)")
@@ -128,15 +132,17 @@ def main():
     # prompt to choose a video
     options = [vid.video for vid in videos]
     options.append("exit")
-    current = choose_option(message="Which episode?",
-                            options=options,
-                            default=ctx.counter)
+    current = choose_option(
+        message="Which episode?",
+        options=options,
+        default=ctx.counter
+    )
 
     # exit option
     if current == len(videos):
         logging.info("Ok, no episodes for now")
         return
-    
+
     # not default option
     if ctx.counter != current and ask_confirm("Reset counter to this episode?"):
         ctx.counter = current
@@ -146,7 +152,7 @@ def main():
     # default option and increament
     if current == ctx.counter and ask_confirm("Did you watch this episode completely?"):
         ctx.counter += 1
-    
+
     ctx.write_file(".fiml")
 
 
