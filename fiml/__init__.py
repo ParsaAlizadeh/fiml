@@ -5,6 +5,7 @@ import logging
 import os
 import subprocess
 import mimetypes
+import sys
 from typing import *
 
 import inquirer
@@ -119,7 +120,14 @@ def list_files(root):
 
 
 def main():
-    ctx = Context().read_file('.fiml')
+    # read path from argv
+    if len(sys.argv) == 2:
+        path = sys.argv[1]
+        os.chdir(path)
+
+    # create context
+    ctx = Context()
+    ctx.read_file('.fiml')
 
     # explore whole directory
     all_files = list_files('.')
