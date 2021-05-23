@@ -30,7 +30,7 @@ class Video:
 
     def watch(self) -> int:
         """ call watch process """
-        logging.info(f"Watching {self.video}...")
+        logging.info("Watching %s...", self.video)
         command = ["mpv", self.video, "--no-terminal"]
         if self.sub:
             command.append(f"--sub-file={self.sub}")
@@ -40,13 +40,13 @@ class Video:
     @staticmethod
     def is_video(filename: str) -> bool:
         """ check if video """
-        guess_type, encode = mimetypes.guess_type(filename)
+        guess_type, _ = mimetypes.guess_type(filename)
         return guess_type is not None and guess_type[:6] == "video/"
 
     @staticmethod
     def is_sub(filename: str) -> bool:
         """ check if sub """
-        guess_type, encode = mimetypes.guess_type(filename)
+        guess_type, _ = mimetypes.guess_type(filename)
         return guess_type == "application/x-subrip"
 
     @classmethod
@@ -60,9 +60,14 @@ class Video:
 
 
 class Context:
-    def __init__(self):
+    def __init__(self, filename: str):
         self.data = {}
         self.counter = 0
+        self.filename = filename
+        self.read_file(self.filename)
+
+    def __del__(self):
+        self.write_file(self.filename)
 
     @property
     def counter(self):
@@ -126,8 +131,7 @@ def main():
         os.chdir(path)
 
     # create context
-    ctx = Context()
-    ctx.read_file('.fiml')
+    ctx = Context(filename='.fiml')
 
     # explore whole directory
     all_files = list_files('.')
@@ -163,8 +167,6 @@ def main():
     # default option and increament
     if current == ctx.counter and ask_confirm("Did you watch this episode completely?"):
         ctx.counter += 1
-
-    ctx.write_file(".fiml")
 
 
 if __name__ == "__main__":
