@@ -6,7 +6,7 @@ with open("requirements.txt", "r") as file:
 setup(
     name="fiml",
     description="VCS-like program for managing episodes and subtitles, and watching through mpv",
-    version="0.0.3",
+    version="0.0.4",
     author="Parsa Alizadeh",
     license="MIT",
     packages=find_packages(),
