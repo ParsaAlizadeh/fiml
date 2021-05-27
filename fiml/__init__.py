@@ -50,7 +50,7 @@ class Video:
         return guess_type == "application/x-subrip"
 
     @classmethod
-    def find_all(cls, files: List[str]):
+    def find_all(cls, files: List[str]) -> List['Video']:
         """ find and match videos and subs """
         # sort lexographically
         videos = sorted(filter(cls.is_video, files))
@@ -70,14 +70,14 @@ class Context:
         self.write_file(self.filename)
 
     @property
-    def counter(self):
+    def counter(self) -> int:
         return self.data['counter']
 
     @counter.setter
     def counter(self, x: int):
         self.data['counter'] = x
 
-    def read_file(self, filename: str):
+    def read_file(self, filename: str) -> 'Context':
         """ load from file """
         if not os.path.isfile(filename):
             return self
@@ -85,7 +85,7 @@ class Context:
             self.data = json.load(file)
         return self
 
-    def write_file(self, filename: str):
+    def write_file(self, filename: str) -> None:
         """ write to file """
         with open(filename, 'w') as file:
             json.dump(self.data, file)
@@ -115,7 +115,7 @@ def ask_confirm(message: str) -> bool:
     return answer["confirm"]
 
 
-def list_files(root):
+def list_files(root: str) -> List[str]:
     """ list all files inside root """
     result = []
     for root, _, files in os.walk(root):
