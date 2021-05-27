@@ -34,7 +34,10 @@ class Video:
         command = ["mpv", self.video, "--no-terminal"]
         if self.sub:
             command.append(f"--sub-file={self.sub}")
-        subprocess.run(command)
+        try:
+            subprocess.run(command, check=True)
+        except subprocess.CalledProcessError as err:
+            logging.error("Watch process ends with %s code", err.returncode)
         return self.index
 
     @staticmethod
