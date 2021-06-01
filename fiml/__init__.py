@@ -97,26 +97,19 @@ class Context:
 def choose_option(message: str, options: List[str], default: int = 0) -> int:
     """ option prompt on terminal """
     choices = [(opt, i) for i, opt in enumerate(options)]
-    answer = inquirer.prompt([
-        inquirer.List("list",
-            message=message,
-            choices=choices,
-            default=default
-        )
-    ])
-    return answer["list"]
+    return inquirer.list_input(
+        message=message,
+        choices=choices,
+        default=default
+    )
 
 
 def ask_confirm(message: str, default: bool = True) -> bool:
     """ yes/no question on terminal """
-    answer = inquirer.prompt([
-        inquirer.Confirm(
-            "confirm",
-            message=message,
-            default=default,
-        )
-    ])
-    return answer["confirm"]
+    return inquirer.confirm(
+        message=message,
+        default=default,
+    )
 
 
 def list_files(root: str) -> List[str]:
