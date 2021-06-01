@@ -107,12 +107,13 @@ def choose_option(message: str, options: List[str], default: int = 0) -> int:
     return options.index(answer["list"])
 
 
-def ask_confirm(message: str) -> bool:
+def ask_confirm(message: str, default: bool = True) -> bool:
     """ yes/no question on terminal """
     answer = inquirer.prompt([
         inquirer.Confirm(
             "confirm",
-            message=message
+            message=message,
+            default=default,
         )
     ])
     return answer["confirm"]
