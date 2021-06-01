@@ -121,17 +121,12 @@ def list_files(root: str) -> List[str]:
     return result
 
 
-def main():
-    # read path from argv
-    if len(sys.argv) == 2:
-        path = sys.argv[1]
-        os.chdir(path)
-
+def workflow(path: str):
     # create context
-    ctx = Context(filename='.fiml')
+    ctx = Context(filename=os.path.join(path, '.fiml'))
 
     # explore whole directory
-    all_files = list_files('.')
+    all_files = list_files(root=path)
 
     # find videos and match subs to them
     videos = Video.find_all(all_files)
@@ -164,6 +159,18 @@ def main():
     # default option and increament
     if current == ctx.counter and ask_confirm("Did you watch this episode completely?"):
         ctx.counter += 1
+
+def main():
+    # read path from argv
+    path = './'
+    if len(sys.argv) == 2:
+        path = sys.argv[1]
+
+    # log keyboard interrupts
+    try:
+        workflow(path)
+    except KeyboardInterrupt:
+        logging.info("Skipped")
 
 
 if __name__ == "__main__":
