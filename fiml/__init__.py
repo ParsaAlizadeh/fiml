@@ -96,15 +96,15 @@ class Context:
 
 def choose_option(message: str, options: List[str], default: int = 0) -> int:
     """ option prompt on terminal """
+    choices = [(opt, i) for i, opt in enumerate(options)]
     answer = inquirer.prompt([
-        inquirer.List(
-            "list",
+        inquirer.List("list",
             message=message,
-            choices=options,
-            default=options[default]
+            choices=choices,
+            default=default
         )
     ])
-    return options.index(answer["list"])
+    return answer["list"]
 
 
 def ask_confirm(message: str, default: bool = True) -> bool:
