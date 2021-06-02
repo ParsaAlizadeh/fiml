@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import argparse
 import json
 import logging
 import os
@@ -7,6 +8,7 @@ import subprocess
 import mimetypes
 import sys
 from typing import *
+from pathlib import Path
 
 import inquirer
 
@@ -63,14 +65,14 @@ class Video:
 
 
 class Context:
-    def __init__(self, filename: str):
+    def __init__(self, filename: Path):
         self.data = {}
         self.counter = 0
         self.filename = filename
-        self.read_file(self.filename)
+        self.read_file()
 
     def __del__(self):
-        self.write_file(self.filename)
+        self.write_file()
 
     @property
     def counter(self) -> int:
@@ -80,17 +82,16 @@ class Context:
     def counter(self, x: int):
         self.data['counter'] = x
 
-    def read_file(self, filename: str) -> 'Context':
+    def read_file(self):
         """ load from file """
-        if not os.path.isfile(filename):
-            return self
-        with open(filename, 'r') as file:
+        if not self.filename.is_file():
+            return
+        with self.filename.open() as file:
             self.data = json.load(file)
-        return self
 
-    def write_file(self, filename: str) -> None:
+    def write_file(self) -> None:
         """ write to file """
-        with open(filename, 'w') as file:
+        with self.filename.open(mode='w') as file:
             json.dump(self.data, file)
 
 
@@ -112,21 +113,12 @@ def ask_confirm(message: str, default: bool = True) -> bool:
     )
 
 
-def list_files(root: str) -> List[str]:
-    """ list all files inside root """
-    result = []
-    for root, _, files in os.walk(root):
-        for f in files:
-            result.append(os.path.join(root, f))
-    return result
-
-
-def workflow(path: str):
+def workflow(path: Path):
     # create context
-    ctx = Context(filename=os.path.join(path, '.fiml'))
+    ctx = Context(filename=path/'.fiml')
 
     # explore whole directory
-    all_files = list_files(root=path)
+    all_files = list(map(str, path.rglob('*')))
 
     # find videos and match subs to them
     videos = Video.find_all(all_files)
@@ -161,10 +153,21 @@ def workflow(path: str):
         ctx.counter += 1
 
 def main():
-    # read path from argv
-    path = './'
-    if len(sys.argv) == 2:
-        path = sys.argv[1]
+    # parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-p', '--path',
+        default='./',
+        type=Path,
+        help='path to series (default: %(default)s)'
+    )
+    args = parser.parse_args()
+    path = args.path.resolve()
+
+    # check for non-exist path
+    if not path.is_dir():
+        logging.error('No such path: %s', path)
+        return
 
     # log keyboard interrupts
     try:
