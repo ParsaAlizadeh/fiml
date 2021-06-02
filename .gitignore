@@ -2,6 +2,7 @@
 build/
 dist/
 fiml.egg-info/
+**/__pycache__/
 
 # editors
 .idea/

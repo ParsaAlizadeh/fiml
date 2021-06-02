@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+__version__ = '0.0.5'
 
 import argparse
 import json
@@ -155,6 +156,11 @@ def workflow(path: Path):
 def main():
     # parse arguments
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-v', '--version',
+        action='version',
+        version=f'%(prog)s {__version__}'
+    )
     parser.add_argument(
         '-p', '--path',
         default='./',

@@ -1,4 +1,5 @@
 from setuptools import find_packages, setup
+from fiml import __version__
 
 with open("requirements.txt", "r") as file:
     install_requires = file.readlines()
@@ -6,7 +7,7 @@ with open("requirements.txt", "r") as file:
 setup(
     name="fiml",
     description="VCS-like program for managing episodes and subtitles, and watching through mpv",
-    version="0.0.5",
+    version=__version__,
     author="Parsa Alizadeh",
     license="MIT",
     packages=find_packages(),
