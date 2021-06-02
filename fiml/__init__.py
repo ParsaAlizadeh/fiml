@@ -92,7 +92,7 @@ class Context:
     def write_file(self) -> None:
         """ write to file """
         with self.filename.open(mode='w') as file:
-            json.dump(self.data, file)
+            json.dump(self.data, file, indent=4)
 
 
 def choose_option(message: str, options: List[str], default: int = 0) -> int:
