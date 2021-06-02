@@ -20,6 +20,7 @@ logging.basicConfig(
 
 
 def resize(seq: List, n: int, default=None) -> List:
+    """ resize seq to exactly have n members """
     seq = seq[:n]
     seq = seq + [default] * (n - len(seq))
     return seq
@@ -77,11 +78,13 @@ class Context:
 
     @property
     def counter(self) -> int:
+        """ get current counter """
         return self.data['counter']
 
     @counter.setter
-    def counter(self, x: int):
-        self.data['counter'] = x
+    def counter(self, value: int):
+        """ update counter """
+        self.data['counter'] = value
 
     def read_file(self):
         """ load from file """
@@ -115,6 +118,7 @@ def ask_confirm(message: str, default: bool = True) -> bool:
 
 
 def workflow(path: Path):
+    """ simple workflow to watch episodes inside path """
     # create context
     ctx = Context(filename=path/'.fiml')
 
@@ -154,6 +158,7 @@ def workflow(path: Path):
         ctx.counter += 1
 
 def main():
+    """ command line function """
     # parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
