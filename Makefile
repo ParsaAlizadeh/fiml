@@ -1,5 +1,5 @@
-install: uninstall clean build
-	sudo pip install dist/*
+install: uninstall
+	sudo python setup.py install
 clean:
 	rm -rf build/ dist/ fiml.egg-info
 	rm -rf **/__pycache__/
