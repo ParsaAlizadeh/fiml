@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 
 import argparse
 import json
@@ -99,63 +99,66 @@ class Context:
             json.dump(self.data, file, indent=4)
 
 
-def choose_option(message: str, options: List[str], default: int = 0) -> int:
-    """ option prompt on terminal """
-    choices = [(opt, i) for i, opt in enumerate(options)]
-    return inquirer.list_input(
-        message=message,
-        choices=choices,
-        default=default
-    )
+class Workflow:
+    def __init__(self, root: Path):
+        self.root = root
+        self.ctx = Context(filename=self.root/'.fiml')
 
+    def run(self):
+        """ run the workflow """
+        # explore whole directory
+        all_files = list(map(str, self.root.rglob('*')))
 
-def ask_confirm(message: str, default: bool = True) -> bool:
-    """ yes/no question on terminal """
-    return inquirer.confirm(
-        message=message,
-        default=default,
-    )
+        # find videos and match subs to them
+        videos = Video.find_all(all_files)
 
+        # if no new episode
+        if self.ctx.counter >= len(videos):
+            logging.info("You watched all episodes already :)")
+            self.ctx.counter = len(videos)
 
-def workflow(path: Path):
-    """ simple workflow to watch episodes inside path """
-    # create context
-    ctx = Context(filename=path/'.fiml')
+        # prompt to choose a video
+        options = [vid.video for vid in videos]
+        options.append("exit")
+        current = self.choose_option(
+            message="Which episode?",
+            options=options,
+            default=self.ctx.counter
+        )
 
-    # explore whole directory
-    all_files = list(map(str, path.rglob('*')))
+        # exit option
+        if current == len(videos):
+            logging.info("Ok, no episodes for now")
+            return
 
-    # find videos and match subs to them
-    videos = Video.find_all(all_files)
+        # not default option
+        reset_message = "Reset counter to this episode?"
+        if self.ctx.counter != current and self.ask_confirm(reset_message):
+            self.ctx.counter = current
 
-    # if no new episode
-    if ctx.counter >= len(videos):
-        logging.info("You watched all episodes already :)")
-        ctx.counter = len(videos)
+        videos[current].watch()
 
-    # prompt to choose a video
-    options = [vid.video for vid in videos]
-    options.append("exit")
-    current = choose_option(
-        message="Which episode?",
-        options=options,
-        default=ctx.counter
-    )
+        # default option and increament
+        complete_message = "Did you watch this episode completely?"
+        if current == self.ctx.counter and self.ask_confirm(complete_message):
+            self.ctx.counter += 1
 
-    # exit option
-    if current == len(videos):
-        logging.info("Ok, no episodes for now")
-        return
+    def choose_option(self, message: str, options: List[str], default: int = 0) -> int:
+        """ option prompt on terminal """
+        choices = [(opt, i) for i, opt in enumerate(options)]
+        return inquirer.list_input(
+            message=message,
+            choices=choices,
+            default=default
+        )
 
-    # not default option
-    if ctx.counter != current and ask_confirm("Reset counter to this episode?"):
-        ctx.counter = current
+    def ask_confirm(self, message: str, default: bool = True) -> bool:
+        """ yes/no question on terminal """
+        return inquirer.confirm(
+            message=message,
+            default=default,
+        )
 
-    videos[current].watch()
-
-    # default option and increament
-    if current == ctx.counter and ask_confirm("Did you watch this episode completely?"):
-        ctx.counter += 1
 
 def main():
     """ command line function """
@@ -181,8 +184,9 @@ def main():
         return
 
     # log keyboard interrupts
+    workflow = Workflow(root=path)
     try:
-        workflow(path)
+        workflow.run()
     except KeyboardInterrupt:
         logging.info("Skipped")
 
