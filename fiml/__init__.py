@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-__version__ = '0.0.7'
+__version__ = '0.1.0'
 
 import argparse
 import json
@@ -100,9 +100,10 @@ class Context:
 
 
 class Workflow:
-    def __init__(self, root: Path):
+    def __init__(self, root: Path, noconfirm: bool = False):
         self.root = root
         self.ctx = Context(filename=self.root/'.fiml')
+        self.noconfirm = noconfirm
 
     def run(self):
         """ run the workflow """
@@ -145,6 +146,8 @@ class Workflow:
 
     def choose_option(self, message: str, options: List[str], default: int = 0) -> int:
         """ option prompt on terminal """
+        if self.noconfirm:
+            return default
         choices = [(opt, i) for i, opt in enumerate(options)]
         return inquirer.list_input(
             message=message,
@@ -154,6 +157,8 @@ class Workflow:
 
     def ask_confirm(self, message: str, default: bool = True) -> bool:
         """ yes/no question on terminal """
+        if self.noconfirm:
+            return default
         return inquirer.confirm(
             message=message,
             default=default,
@@ -170,6 +175,11 @@ def main():
         version=f'%(prog)s {__version__}'
     )
     parser.add_argument(
+        '-n', '--noconfirm',
+        action='store_true',
+        help='no confirmation'
+    )
+    parser.add_argument(
         '-p', '--path',
         default='./',
         type=Path,
@@ -183,11 +193,14 @@ def main():
         logging.error('No such path: %s', path)
         return
 
-    # log keyboard interrupts
-    workflow = Workflow(root=path)
+    workflow = Workflow(
+        root=path,
+        noconfirm=args.noconfirm
+    )
     try:
         workflow.run()
     except KeyboardInterrupt:
+        # log keyboard interrupts
         logging.info("Skipped")
 
 
