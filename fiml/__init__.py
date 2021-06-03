@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 import argparse
 import json
@@ -105,7 +105,7 @@ class Workflow:
         self.ctx = Context(filename=self.root/'.fiml')
         self.noconfirm = noconfirm
 
-    def run(self):
+    def run(self) -> bool:
         """ run the workflow """
         # explore whole directory
         all_files = list(map(str, self.root.rglob('*')))
@@ -130,7 +130,7 @@ class Workflow:
         # exit option
         if current == len(videos):
             logging.info("Ok, no episodes for now")
-            return
+            return False
 
         # not default option
         reset_message = "Reset counter to this episode?"
@@ -143,6 +143,10 @@ class Workflow:
         complete_message = "Did you watch this episode completely?"
         if current == self.ctx.counter and self.ask_confirm(complete_message):
             self.ctx.counter += 1
+            return True
+
+        # no further watch
+        return False
 
     def choose_option(self, message: str, options: List[str], default: int = 0) -> int:
         """ option prompt on terminal """
@@ -180,6 +184,11 @@ def main():
         help='no confirmation'
     )
     parser.add_argument(
+        '-b', '--batch',
+        action='store_true',
+        help='play in batch'
+    )
+    parser.add_argument(
         '-p', '--path',
         default='./',
         type=Path,
@@ -198,7 +207,9 @@ def main():
         noconfirm=args.noconfirm
     )
     try:
-        workflow.run()
+        further_watch = True
+        while further_watch:
+            further_watch = workflow.run() and args.batch
     except KeyboardInterrupt:
         # log keyboard interrupts
         logging.info("Skipped")
